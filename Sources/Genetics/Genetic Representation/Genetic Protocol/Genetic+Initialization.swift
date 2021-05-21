@@ -11,7 +11,7 @@ import Foundation
 extension Genetic {
     /// Initializes a Genetic Object from a list of traits.
     /// - Parameter chromosome: `[Trait]`
-    init(chromosome: [Trait]) {
+    public init(chromosome: [Trait]) {
         self.init()
         self.chromosome = chromosome
     }
