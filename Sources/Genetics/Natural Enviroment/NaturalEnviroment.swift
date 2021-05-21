@@ -42,7 +42,7 @@ public class NaturalEnvironment {
         self.iterateOverOperations()
     }
     
-    public func currentIteration() -> Int {
+    public func getCurrentIteration() -> Int {
         return self.currentIteration
     }
     
