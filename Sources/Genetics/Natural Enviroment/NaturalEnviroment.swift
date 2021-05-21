@@ -14,6 +14,7 @@ public class NaturalEnvironment {
     /// The population of this Eviroment
     public var population: [Genetic]
     public var shouldContinue: Bool = true
+    public var currentIteration: Int = 0
     
     private var currentOperationIndex: UInt = 0
     private var operations: [GeneticOperation]
@@ -41,10 +42,15 @@ public class NaturalEnvironment {
         self.iterateOverOperations()
     }
     
+    public func currentIteration() -> Int {
+        return self.currentIteration
+    }
+    
     private func iterateOverOperations() {
         while(self.shouldContinue) {
             if (currentOperationIndex > operations.count - 1) {
                 currentOperationIndex = 0
+                currentIteration += 1
             }
             operations[Int(currentOperationIndex)](&population)
             currentOperationIndex += 1

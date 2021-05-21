@@ -104,7 +104,7 @@ extension Genetic {
     
     public func revolvingRandomCrossover(with other: Self, proportion: Double = 0.7, shouldDifferProportion: Bool = false) -> Self {
         precondition(self.chromosome.count == other.chromosome.count, "Chromosome lenghts between self and other must be equal.")
-        let preconditon:Bool = ((proportion > 1.0) || (Int(proportion * Double(other.chromosome.count)) >= self.chromosome.count))
+        let preconditon:Bool = ((proportion < 1.0) || (Int(proportion * Double(other.chromosome.count)) <= self.chromosome.count))
         precondition(preconditon, "The proportion of copied genes cannot be over 100% of the length of self or others chromosome.")
         // Continue...Initialize child traits from parent.
         var childTraits = other.chromosome
