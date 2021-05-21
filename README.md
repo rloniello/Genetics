@@ -4,6 +4,7 @@
 
 Genetics is a Swift Package that provides complete support for Genetic Algorithms using The Swift Programing Language.
 The purpose of this package is to allow Swift Developers, Computer Scientist and other Researchers to easlily implement Genetic Algorithms in their iOS, macOS and iPadOS apps. This genetics library is one of the few that supports in-order and in-place chromosome and mutation support.
+
 In complex apps it is sometimes advantagous to generate high-quality solutions to bounded or unbounded optimization problems. The Genetics Package allows the developer to implement a metaheuristic approach rather than rely on brute force computation or other machine learning methods.
 When used properly, even complex problems with permuations of approximatly 10^144 can be found in less than 20 iterations, see "NthLetterSearch" example provided below.
 
