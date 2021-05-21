@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// The standard method for manipulating a population of Genetic Objects.
+/// A standardized method for manipulating a population of Genetic Objects.
 /// Every genetic operation should take a mutable population and return nothing.
-/// Changes to members of the population should happen in-place.
+/// Changes to members of the population should happen in-place if possible.
 public typealias GeneticOperation = (_ population: inout [Genetic]) -> Void
