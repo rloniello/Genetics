@@ -8,6 +8,6 @@
 import Foundation
 
 
-/// A collection of factory methods used to create Fitness methods in the form of Genetic Operations.
+/// A collection of factory methods used to create Fitness Methods in the form of Genetic Operations.
 /// Extend this structure with your method returning a `GeneticOperation`.
 public struct FitnessMethods { }

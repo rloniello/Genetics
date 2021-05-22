@@ -13,15 +13,14 @@ extension SelectionMethods {
     /// Members of the population are chosen based on a their fitness.
     /// Genetic Objects must calculate fitness before Tournament selection.
     /// - Returns:`GeneticOperation`
-    public static func BasicTournamentSelection() -> GeneticOperation {
+    public static func BasicTournamentSelection(fighting: Int = 3) -> GeneticOperation {
         let operation: GeneticOperation = { population in
             var offspring:[Genetic] = [Genetic]()
-            let fighting: Int = 3
             if (population.count < fighting) { debugPrint(GeneticError(error: .insufficientPopulation)) }
             // while the offspring population is less than the given population.
             // Randomly Select pairs of fighting individuals.
             // Mate the two winners, and add the offspring to the next population.
-            // Continue until we reach the same population.
+            // Continue until we reach the same number of members in the population.
             while (offspring.count < population.count) {
                 var primary = [Genetic]()
                 var secondary = [Genetic]()

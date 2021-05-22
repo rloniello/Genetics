@@ -11,30 +11,16 @@ import Foundation
 extension Genetic {
     
     /// A universal crossover method that creates two children by spliting the parents chromosomes over each other.
-    /// See, [A Comparative Study of Modified Crossover Operators](https://sci-hub.se/10.1109/ICIIP.2015.7414781)
-    ///
-    /// Example:
-    ///
-    /// chomosome A =  [1 1 1 1 1 1 1]
-    ///
-    /// chomosome B = [0 0 0 0 0 0 0 ]
-    ///
-    /// Child One = [1 1 1 1 0 0 0]
-    ///
-    /// Child Two = [0 0 0 0 1 1 1]
-    ///
-    ///- Note:
     ///
     /// - Parameters:
     ///   - position: The index of the crossover point.
     ///   - other: Another `Genetic` Object.
     /// - Throws: `GeneticError` of type `.unableToReproduce`
     /// - Returns: Two `Genetic` Objects of the callers type.
-    public func standardSinglePointCrossover(at position: Int, with other: Self) throws -> (childOne: Self, childTwo: Self) {
+    public func standardSinglePointCrossover(at position: Int, with other: Self) -> (childOne: Self, childTwo: Self) {
         // Ensure we can reproduce at the selected point.
-        if (position >= self.chromosome.count || position >= other.chromosome.count) {
-            throw GeneticError(error: .unableToReproduce)
-        }
+        let precondtion:Bool = (position <= self.chromosome.count && position <= other.chromosome.count)
+        precondition(precondtion, "Chromosomes length between self and other must be equal, traits cannot be copied when chromsome pairs are not the same length.")
         
         var childOneTraits = [Trait]()
         var childTwoTraits = [Trait]()
@@ -69,7 +55,15 @@ extension Genetic {
         return Self.init(chromosome: childTraits)
     }
 
-    public func uniformCrossover(with other: Self, atRate: Double) -> Self {
+    
+    /// Performes uniform crossover at the given rate.
+    /// Define a value between 1 and 0 for the rate.
+    /// Genes from `other` are selected at the given rate, otherwise a trait is taken from the caller.
+    /// - Parameters:
+    ///   - other: Another Genetic Object of the same type
+    ///   - atRate: The mutation rate for each gene, default value is 0.5 or 50%.
+    /// - Returns: A child of the same type as the caller.
+    public func uniformCrossover(with other: Self, atRate: Double = 0.5) -> Self {
         if (atRate >= 1.0) {
             return self
         }
@@ -84,14 +78,26 @@ extension Genetic {
         return Self.init(chromosome: childTraits)
     }
     
+    
+    /// Performes uniform crossover of each trait-position at a given rate.
+    /// For each value, define a value between 1 and 0.
+    /// The given rate is the probability the value will be selected from the caller.
+    /// This is calculated by randomly generating a value between 0 and 1,
+    /// if this value is less than the rate, then the trait is taken from the caller.
+    ///
+    /// 1) The number of traits must match between `self` and `other`.
+    /// 2) The number of values in `atRates` must match the number of traits in the chromosome.
+    ///
+    /// - Parameters:
+    ///   - other: Another Genetic Object of the same type
+    ///   - atRates: An array of values between 1 and 0.
+    /// - Returns: A child of the same type as the caller.
     public func uniformCrossover(with other: Self, atRates: [Double]) -> Self {
         precondition(self.chromosome.count == other.chromosome.count, "Chromosome lenghts between self and other must be equal.")
         precondition(self.chromosome.count == atRates.count, "The number of probabilities (count of) must be equal to the chromsome length.")
         var childTraits = [Trait]()
-        let uniformRate:Double = drand48()
-        
         for (index, trait) in self.chromosome.enumerated() {
-            if (uniformRate > atRates[index]) {
+            if (drand48() < atRates[index]) {
                 childTraits.append(trait)
             } else {
                 childTraits.append(other.chromosome[index])
@@ -101,7 +107,19 @@ extension Genetic {
         return Self.init(chromosome: childTraits)
     }
     
-    
+    /// A universal crossover method intended to be a dynamic solution to hill-climbing stagnation.
+    ///
+    /// Revolving Random Crossover (RRC) is an active crossover method that randomly selects a point in the chromosome,
+    /// then copies a given proportion of Traits from the caller over to the child.
+    /// This copying of traits does not end when the end of the chromsome is reached. Instead, copying begins again at the beginning.
+    /// Thus "revolving" around the chromsome.
+    /// Since we are copying a proportion of the traits rather than a range (as in single point crossover) we can vary the proportion
+    /// of traits if desired, resulting in an increase in mixed traits while helping to preserve schema by grouping parts of the the chromosome.
+    /// - Parameters:
+    ///   - other: Another Genetic Object of the same type
+    ///   - proportion: The proportion of traits that ought to be copied from the caller. Use a value between 0 and 1. default is 0.7, or 70%
+    ///   - shouldDifferProportion: Wether or not the proportion of copied traits should vary (up to the given proportion)
+    /// - Returns:A child of the same type as the caller.
     public func revolvingRandomCrossover(with other: Self, proportion: Double = 0.7, shouldDifferProportion: Bool = false) -> Self {
         precondition(self.chromosome.count == other.chromosome.count, "Chromosome lenghts between self and other must be equal.")
         let preconditon:Bool = ((proportion < 1.0) || (Int(proportion * Double(other.chromosome.count)) <= self.chromosome.count))

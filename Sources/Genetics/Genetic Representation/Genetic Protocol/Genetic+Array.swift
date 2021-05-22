@@ -38,7 +38,10 @@ extension Array where Element: Equatable {
 }
 
 extension Array where Element: Genetic {
-    
+    /// Initializes a Genetic population with the given number of members.
+    /// This method uses the Genetic Objects Genome to initalize.
+    /// Enusre you have set the genome of your object before using this method.
+    /// - Parameter randomPopulationOf: The number of members in the population.
     public init(randomPopulationOf: Int) {
         self.init()
         for _ in 0..<randomPopulationOf {
@@ -46,6 +49,18 @@ extension Array where Element: Genetic {
         }
     }
     
+    
+    /// A Generic Genetic initialization method that Initializes a Genetic population with the given number of members.
+    /// This method uses the Genetic Object's chromosome to initialize.
+    /// Traits are chosen at random from the trait collection.
+    ///
+    /// - Warning:
+    /// This method does not perserve in-order and in-place traits.
+    ///
+    /// - Parameters:
+    ///   - randomPopulationOf: The number of members in the population.
+    ///   - numberOfTraits: How many traits to copy from the given trait list.
+    ///   - inTraitCollection: A list of traits to select from.
     public init(randomPopulationOf: Int, numberOfTraits: Int, inTraitCollection: [Trait]) {
         self.init()
         for _ in 0..<randomPopulationOf {

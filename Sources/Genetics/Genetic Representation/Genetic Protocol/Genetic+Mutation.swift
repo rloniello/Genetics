@@ -49,7 +49,7 @@ extension Genetic {
     /// - Parameters:
     ///   - population: A population to compare caller to.
     ///   - limit: A limit on the number of chromosomes that should be swapped.
-    public mutating func lamarckMutation(withRespectTo population: [Self], limit: Int = 1) {
+    public mutating func lamarckMutation<G:Genetic>(withRespectTo population: [G], limit: Int = 1) {
         guard let moreFitMember = population.filter({$0.fitness > self.fitness}).randomElement() else {
             return
         }
