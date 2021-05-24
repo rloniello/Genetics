@@ -12,47 +12,53 @@ extension Genetic {
     
     /// A universal crossover method that creates two children by spliting the parents chromosomes over each other.
     ///
+    /// The chromsome of the caller is split at the point `between` the array's index points.
+    /// The offset point is the position to the left of the index.
+    /// An offset point of 0 at the begining of the array, an offset of 1 is between indexes 0 and 1.
+    /// Thus only the traits beyond the first will be swapped. See the example below.
+    ///
+    /// ```
+    /// let first = Cryptid(chromosome: [Trait(1),Trait(1),Trait(1),Trait(1),Trait(1),Trait(1)])
+    /// let second = Cryptid(chromosome: [Trait(0),Trait(0),Trait(0),Trait(0),Trait(0),Trait(0)])
+    /// let children = try! first.standardSinglePointCrossover(offset: first.chromosome.count / 2, with: second)
+    /// print(children.firstBorn.chromosomeToString()) // 111000
+    /// print(children.secondBorn.chromosomeToString()) // 000111
+    /// ```
     /// - Parameters:
-    ///   - position: The index of the crossover point.
+    ///   - point: The offset point between indexes where the chromosome is split.
     ///   - other: Another `Genetic` Object.
     /// - Throws: `GeneticError` of type `.unableToReproduce`
-    /// - Returns: Two `Genetic` Objects of the callers type.
-    public func standardSinglePointCrossover(at position: Int, with other: Self) -> (childOne: Self, childTwo: Self) {
+    /// - Returns: A tuple of two `Genetic` Objects of the callers type.
+    public func standardSinglePointCrossover(point: Int, with other: Self) throws -> (firstBorn: Self, secondBorn: Self) {
         // Ensure we can reproduce at the selected point.
-        let precondtion:Bool = (position <= self.chromosome.count && position <= other.chromosome.count)
-        precondition(precondtion, "Chromosomes length between self and other must be equal, traits cannot be copied when chromsome pairs are not the same length.")
+        let equalTraitCount: Bool = (self.chromosome.count == other.chromosome.count)
+        let withinRange:     Bool = (point > 0 && point < self.chromosome.count)
+        
+        if (!equalTraitCount || !withinRange) {
+            throw GeneticError("Trait count must be equal between self and other and must be within the range of operation (0 <-> chromosome.count - 1). value of point: \(point) may not be valid.", members: [self, other], error: .unableToReproduce)
+        }
         
         var childOneTraits = [Trait]()
         var childTwoTraits = [Trait]()
         
-        childOneTraits.append(contentsOf: Array(self.chromosome[..<position]))
-        childOneTraits.append(contentsOf: Array(other.chromosome[position...]))
+        childOneTraits.append(contentsOf: Array(self.chromosome[..<point]))
+        childOneTraits.append(contentsOf: Array(other.chromosome[point...]))
         
-        childTwoTraits.append(contentsOf: Array(self.chromosome[position...]))
-        childTwoTraits.append(contentsOf: Array(other.chromosome[..<position]))
+        childTwoTraits.append(contentsOf: Array(other.chromosome[..<point]))
+        childTwoTraits.append(contentsOf: Array(self.chromosome[point...]))
         
         return (Self.init(chromosome: childOneTraits), Self.init(chromosome: childTwoTraits))
     }
     
     
-    /// A standard crossover method utilizing a random point in the chromosome.
+    /// A standard crossover method utilizing a random point (offset) between traits in the chromosome.
     /// All non-matching traits between parents are moved over to the child.
     /// - Parameter other: Another object of type `Self`
-    /// - Returns: A single child of type `Self`
-    public func singlePointRandomCrossover(with other: Self) -> Self {
-        let precondtion:Bool = (self.chromosome.count == other.chromosome.count) && (self.chromosome.count > 2)
-        precondition(precondtion, "Chromosomes length must be greater than 2, and equal in length between self and other: \n self - \(self.chromosome), other: \(other.chromosome)")
-        
-        let randomIndex = Int.random(in: 1..<self.chromosome.count - 1)
-        
-        var childTraits = other.chromosome
-        
-        for index in 0..<randomIndex {
-            if (childTraits[index] != self.chromosome[index]) {
-                childTraits[index] = self.chromosome[index]
-            }
-        }
-        return Self.init(chromosome: childTraits)
+    /// - Throws: `GeneticError` describing  the issue.
+    /// - Returns: A tuple of two `Genetic` Objects of the callers type.
+    public func singlePointRandomCrossover(with other: Self) throws -> (firstBorn: Self, secondBorn: Self) {
+        let random = Int.random(in: 1..<self.chromosome.count - 1)
+        return try self.standardSinglePointCrossover(point: random, with: other)
     }
 
     
@@ -62,16 +68,33 @@ extension Genetic {
     /// - Parameters:
     ///   - other: Another Genetic Object of the same type
     ///   - atRate: The mutation rate for each gene, default value is 0.5 or 50%.
+    /// - Throws: `GeneticError` describing  the issue.
     /// - Returns: A child of the same type as the caller.
-    public func uniformCrossover(with other: Self, atRate: Double = 0.5) -> Self {
+    public func uniformCrossover(with other: Self, atRate: Double = 0.5) throws -> Self {
+        let equalTraitCount: Bool = (self.chromosome.count == other.chromosome.count)
+        let enoughTraits:    Bool = (self.chromosome.count >= 1)
+        
+        // Check preconditions...
+        if (!equalTraitCount) {
+            throw GeneticError("Chromosomes length between self and other must equal",
+                               members: [self, other], error: .unableToReproduce)
+        } else if (!enoughTraits) {
+            throw GeneticError("Chromosomes length must be greater than or equal to 1, There are not enough traits to complete the task",
+                               members: [self, other], error: .insufficientTraits)
+        }
+        
+        // Continue...
         if (atRate >= 1.0) {
             return self
         }
         var childTraits = [Trait]()
+        // For each trait, generate a random number between 0 and 1.
         for (index, trait) in self.chromosome.enumerated() {
             if (drand48() < atRate) {
+                // if it is less than the rate, keep a trait from self.
                 childTraits.append(trait)
             } else {
+                // otherwise, take one from mate.
                 childTraits.append(other.chromosome[index])
             }
         }
@@ -91,10 +114,20 @@ extension Genetic {
     /// - Parameters:
     ///   - other: Another Genetic Object of the same type
     ///   - atRates: An array of values between 1 and 0.
+    /// - Throws: `GeneticError` describing  the issue.
     /// - Returns: A child of the same type as the caller.
-    public func uniformCrossover(with other: Self, atRates: [Double]) -> Self {
-        precondition(self.chromosome.count == other.chromosome.count, "Chromosome lenghts between self and other must be equal.")
-        precondition(self.chromosome.count == atRates.count, "The number of probabilities (count of) must be equal to the chromsome length.")
+    public func uniformCrossover(with other: Self, atRates: [Double]) throws -> Self {
+        let equalTraits: Bool = (self.chromosome.count == other.chromosome.count)
+        let equalRates:  Bool = (self.chromosome.count == atRates.count)
+        
+        if (!equalTraits) {
+            throw GeneticError("Chromosome length between self and other must be equal.",
+                               members: [self, other], error: .unableToReproduce)
+        } else if (!equalRates) {
+            throw GeneticError("The number of probabilities (count of) must be equal to the chromsome length.",
+                               members: [self, other], error: .unableToReproduce)
+        }
+        // Continue...
         var childTraits = [Trait]()
         for (index, trait) in self.chromosome.enumerated() {
             if (drand48() < atRates[index]) {
@@ -119,11 +152,19 @@ extension Genetic {
     ///   - other: Another Genetic Object of the same type
     ///   - proportion: The proportion of traits that ought to be copied from the caller. Use a value between 0 and 1. default is 0.7, or 70%
     ///   - shouldDifferProportion: Wether or not the proportion of copied traits should vary (up to the given proportion)
+    /// - Throws: `GeneticError` describing  the issue.
     /// - Returns:A child of the same type as the caller.
-    public func revolvingRandomCrossover(with other: Self, proportion: Double = 0.7, shouldDifferProportion: Bool = false) -> Self {
-        precondition(self.chromosome.count == other.chromosome.count, "Chromosome lenghts between self and other must be equal.")
-        let preconditon:Bool = ((proportion < 1.0) || (Int(proportion * Double(other.chromosome.count)) <= self.chromosome.count))
-        precondition(preconditon, "The proportion of copied genes cannot be over 100% of the length of self or others chromosome.")
+    public func revolvingRandomCrossover(with other: Self, proportion: Double = 0.7, shouldDifferProportion: Bool = false) throws -> Self {
+        let equalTraits:  Bool = (self.chromosome.count == other.chromosome.count)
+        let underMaximum: Bool = (Int(proportion * Double(other.chromosome.count)) <= self.chromosome.count)
+        
+        if (!equalTraits) {
+            throw GeneticError("Chromosome lenghts between self and other must be equal.",
+                               members: [self, other], error: .unableToReproduce)
+        } else if (!underMaximum) {
+            throw GeneticError("The proportion of copied genes cannot be over 100% of the length of self's or other's chromosome.",
+                               members: [self, other], error: .unableToReproduce)
+        }
         // Continue...Initialize child traits from parent.
         var childTraits = other.chromosome
         // Randomly select the splice point.

@@ -9,37 +9,33 @@ import Foundation
 
 /// Possible errors that could occur with genetic objects.
 public struct GeneticError: Error, CustomStringConvertible {
-    public enum ErrorType {
+    public enum ErrorType: Equatable {
         /// The genetic diversity is threated.
         case threatedPopulation
         /// Population is going extinct.
         case insufficientPopulation
-        /// Breeding apples and oranges, incompatiable chromosomes.
+        /// There are not enough traits (in count or type) to complete the task.
+        case insufficientTraits
+        /// Incompatiable chromosomes, or phenotypes between Genetic Objects.
         case unableToReproduce
         /// A custom error message.
         case custom(_ error: String)
     }
     
     /// Message to the user about this error.
-    let message: String?
-    /// The current Genetic Object that produced the error.
-    let member: Genetic?
+    public let message: String?
+    /// The current Genetic Objects that produced the error, if any.
+    public let members: [Genetic]?
     /// The produced error from the selection process.
-    let error: ErrorType
+    public let error: ErrorType
     
     public var description: String {
-        return "Message: \(String(describing: message)), Member: \(String(describing: member)), Error: \(error)"
+        return "Message: \(String(describing: message)), Member: \(String(describing: members)), Error: \(error)"
     }
     
-    public init(_ message: String? = nil, member: Genetic? = nil, error: ErrorType) {
+    public init(_ message: String? = nil, members: [Genetic]? = nil, error: ErrorType) {
         self.message = message
-        self.member = member
-        self.error = error
-    }
-    
-    public init(_ message: String? = nil, error: ErrorType) {
-        self.message = message
-        self.member = nil
+        self.members = members
         self.error = error
     }
 }
