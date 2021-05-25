@@ -12,7 +12,7 @@ extension Genetic {
     
     
     /// A universal mutation method utilizing the set of known alleles per trait in the Genetic Object's chromosome.
-    ///
+    /// When possible, a different trait within the genes allele is selected.
     ///- Warning:
     /// This method can violate in-place and in-order chromosomes when `shouldShuffle` is enabled.
     ///
@@ -23,11 +23,11 @@ extension Genetic {
         // Ensure the mutation rate is never more than 1.
         var mutationRate:Double = atRate
         if (atRate > 1.0) {mutationRate = 1.0}
-        if (drand48() < mutationRate) {
+        if (drand48() <= mutationRate) {
             // Randomly select trait to mutate.
             let randomIndex:Int = Int.random(in: 0...self.chromosome.count - 1)
             // Find the traits other's alleles in the genome and replace it with a random one.
-            if let trait = Self.genome[randomIndex].randomTrait() {
+            if let trait = Self.genome[randomIndex].randomTrait(excluding: self.chromosome[randomIndex]) {
                 self.chromosome[randomIndex] = trait
             }
             // if requested, Shuffle the traits.
@@ -49,9 +49,9 @@ extension Genetic {
     /// - Parameters:
     ///   - population: A population to compare caller to.
     ///   - limit: A limit on the number of chromosomes that should be swapped.
-    public mutating func lamarckMutation<G:Genetic>(withRespectTo population: [G], limit: Int = 1) {
+    public mutating func lamarckMutation<G:Genetic>(withRespectTo population: [G], limit: Int = 1) throws {
         guard let moreFitMember = population.filter({$0.fitness > self.fitness}).randomElement() else {
-            return
+            throw GeneticError("Not enough members in population", members: population, error: .insufficientPopulation)
         }
         // attempt to find the first random instance of a trait that doesnt match.
         // set selfs' trait at that position to the more fit member's value.

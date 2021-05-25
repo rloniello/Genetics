@@ -53,5 +53,18 @@ public struct Gene {
             return nil
         }
     }
+    
+    /// Returns a random `Trait` from this genes alleles.
+    /// Excluding the given trait.
+    /// - Parameter excluding: Return any other trait execept this one.
+    /// - Returns: A possible trait if any exist.
+    public func randomTrait(excluding: Trait) -> Trait? {
+        let possibleTraits = alleles.filter({$0 != excluding})
+        if let randomtrait = possibleTraits.randomElement() {
+            return randomtrait
+        } else {
+            return nil
+        }
+    }
 }
 
