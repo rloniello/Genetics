@@ -62,17 +62,25 @@ They are defined as follows:
 public typealias GeneticOperation = (_ population: inout [Genetic]) -> Void
 ```
 Genetic Members of the population can be altered, removed, added, etc.
-Usually many GA's have methods for calculating fitness, determining termination condition, selection and breeding and mutation.
+Usually many GA's have methods for calculating fitness, determining termination condition, selection & breeding as well as mutation.
 You may also update the UI, perform background tasks or change runing parameters on the fly.
 
 ```Swift
 // You can define your own.. 
 let calculateFitnessMethod: GeneticOperation =  { population in
-// ...
+    for (index, member) in population.enumerated() {
+        // Read-only:
+        // member.chromosome
+        // Mutable:
+        // population[index].fitness = ... 
+    }
 }
 
 let shouldEndOperation: GeneticOperation = { population in 
-// ...
+    population.sort(by: {$0.fitness > $1.fitness})
+    if (population[0].fitness > 1.0) {
+        naturalEnviroment?.stop()
+    }
 }
 
 // ..And/Or you can use built in methods: 
