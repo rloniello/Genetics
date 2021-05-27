@@ -22,20 +22,75 @@ When used properly, even complex problems with permuations of approximatly 10^14
 
 ### Getting Started
 For basic use, Implementation is quite straight-forward:
-1) Add Genetic to your project. 
+0) Add Genetic to your project. 
 Add Genetics package to your project. [Find out how here](https://developer.apple.com/documentation/swift_packages/adding_package_dependencies_to_your_app)
 
 Then import to your Source files. 
 ```Swift
 import Genetics
 ```
-2) Create a Data Model that conforms to Genetic.
+1) Define a Data Model and Enviroment.
 This is representation of your Genetic Object. 
 You only need to define a Genome for your object, which is a list of Genes. 
+```Swift
+// The Model
+struct Jabberwocky: Genetic {
+    var fitness: Double = 0.0
+    
+    var chromosome: [Trait] = [Trait]()
+    
+    static var genome: [Gene] = [
+        // A Trait can be any value type... 
+        Gene(named: "Example Gene", alleles: [Trait(true), Trait(false), Trait("Snarl"), Trait(110)]),
+        Gene(named: "Wing Span", alleles: [Trait(0.9), Trait(1.0), Trait(1.2), Trait(1.8)]),
+        // ...
+    ]
+    
+    func reproduce(with other: Genetic) throws -> Jabberwocky {
+        let another = Jabberwocky(chromosome: other.chromosome)
+        return try self.uniformCrossover(with:another)
+    }
+}
+// The Enviroment
+var naturalEnviroment: NaturalEnviroment? = nil
+```
 
+2) Define your Operators.
+[Genetic Operators](https://en.wikipedia.org/wiki/Genetic_operator) are any function that takes a population as input and returns nothing. 
+They are defined as follows:
+```Swift
+public typealias GeneticOperation = (_ population: inout [Genetic]) -> Void
+```
+Genetic Members of the population can be altered, removed, added, etc.
+Usually many GA's have methods for calculating fitness, determining termination condition, selection and breeding and mutation.
+You may also update the UI, perform background tasks or change runing parameters on the fly.
 
+```Swift
+// You can define your own.. 
+let calculateFitnessMethod: GeneticOperation =  { population in
+// ...
+}
 
-3) Supply a Data Model, Fitness Method, and Selection Method to a Natural Enviroment.
+let shouldEndOperation: GeneticOperation = { population in 
+// ...
+}
+
+// ..And/Or you can use built in methods: 
+let fitnessMethod = FitnessMethods.hammingDistance(to: "tenletters")
+let selectionMethod = SelectionMethods.BasicTournamentSelection()
+// etc. 
+```
+3) Set the Enviroment and Start!
+A Natural Enviroment is a standarized GA that takes a Genetic Object type and a list of Genetic Operators to perform on them. 
+```Swift
+// Defined Above in Step 1.
+// Note: Operations are performed in-order of appearance, then repeated over and over again until you call 
+// naturalEnviroment.stop() or set naturalEnviroment.shouldContinue to false.
+
+let operations = [calculateFitness, pauseOperation, selectionMethod, mutationMethod]
+naturalEnviroment = NaturalEnvironment(for: Jabberwocky.self, operations: operations)
+naturalEnviroment.start()
+```
 
 ### What does "In-place and In-order" mean ?
 The Genetics Package is structed such that:
