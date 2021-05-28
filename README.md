@@ -106,8 +106,7 @@ Each Gene contains a list of traits as allele's.
 Each Genetic Object contains: 
 1) A Genome that is a list of Gene objects. 
 2) A chromosome that is a list of Trait objects.
-
-
+![in-place and in-order](/Images/Inorderandinplace.png)
 
 
 ### Note on Older Versions

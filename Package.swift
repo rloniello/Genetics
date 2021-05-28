@@ -13,7 +13,8 @@ let package = Package(
     targets: [
         .target(
             name: "Genetics",
-            dependencies: []),
+            exclude: ["Images"]
+        ),
         .testTarget(
             name: "GeneticsTests",
             dependencies: ["Genetics"]),
