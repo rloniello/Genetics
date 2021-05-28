@@ -2,11 +2,12 @@
 
 ### Introduction & Objectives
 
-Genetics is a Swift Package that provides complete support for Genetic Algorithms using The Swift Programing Language.
-The purpose of this package is to allow Swift Developers, Computer Scientist and other Researchers to easlily implement Genetic Algorithms in their iOS, macOS and iPadOS apps. This genetics library is one of the few that supports in-order and in-place chromosome and mutation support.
+Genetics is a Swift Package that provides complete support for Genetic Algorithms using The Swift Programming Language.
+The purpose of this package is to allow Swift Developers, Computer Scientists and other Researchers to easily implement Genetic Algorithms in their iOS, macOS and iPadOS apps. This genetics library is one of the few that supports in-order and in-place chromosome and mutation support.
+ 
+In complex apps it is sometimes advantageous to generate high-quality solutions to bounded or unbounded optimization problems. The Genetics Package allows the developer to implement a metaheuristic approach rather than rely on brute force computation or other machine learning methods.
+When used properly, even complex problems with permutations of approximately 10^144 can be found in less than 20 iterations, see "NthLetterSearch" example provided below.
 
-In complex apps it is sometimes advantagous to generate high-quality solutions to bounded or unbounded optimization problems. The Genetics Package allows the developer to implement a metaheuristic approach rather than rely on brute force computation or other machine learning methods.
-When used properly, even complex problems with permuations of approximatly 10^144 can be found in less than 20 iterations, see "NthLetterSearch" example provided below.
 
 ### Features
 - [x] In-place and in-order Trait support.
@@ -18,7 +19,7 @@ When used properly, even complex problems with permuations of approximatly 10^14
 - [x] Named Genes supporting multiple Traits.
 - [x] Random Trait Initialization from a Genome.
 - [x] Random Population Generation form a Genome.
-- [x] Support for AnyHashable Trait value, including other structs and classes.
+- [x] Support for AnyHashable Trait value, including other structs and complex types.
 
 ### Getting Started
 For basic use, Implementation is quite straight-forward:
@@ -30,7 +31,7 @@ Then import to your Source files.
 import Genetics
 ```
 1) Define a Data Model and Enviroment.
-This is representation of your Genetic Object. 
+This is a representation of your Genetic Object. 
 You only need to define a Genome for your object, which is a list of Genes. 
 ```Swift
 // The Model
@@ -51,8 +52,8 @@ struct Jabberwocky: Genetic {
         return try self.uniformCrossover(with:another)
     }
 }
-// The Enviroment
-var naturalEnviroment: NaturalEnviroment? = nil
+// The Environment
+var naturalEnvironment: NaturalEnvironment? = nil
 ```
 
 2) Define your Operators.
@@ -79,7 +80,7 @@ let calculateFitnessMethod: GeneticOperation =  { population in
 let shouldEndOperation: GeneticOperation = { population in 
     population.sort(by: {$0.fitness > $1.fitness})
     if (population[0].fitness > 1.0) {
-        naturalEnviroment?.stop()
+        naturalEnvironment?.stop()
     }
 }
 
@@ -88,27 +89,26 @@ let fitnessMethod = FitnessMethods.hammingDistance(to: "tenletters")
 let selectionMethod = SelectionMethods.BasicTournamentSelection()
 // etc. 
 ```
-3) Set the Enviroment and Start!
-A Natural Enviroment is a standarized GA that takes a Genetic Object type and a list of Genetic Operators to perform on them. 
+3) Set the Environment and Start!
+A Natural Environment is a standardized GA that takes a Genetic Object type and a list of Genetic Operators to perform on them. 
 ```Swift
 // Defined Above in Step 1.
-// Note: Operations are performed in-order of appearance, then repeated over and over again until you call 
-// naturalEnviroment.stop() or set naturalEnviroment.shouldContinue to false.
+// Note: Operations are performed in-order of appearance, 
+// then repeated over and over again until you call 
+// naturalEnvironment.stop() or set naturalEnvironment.shouldContinue to false.
 
 let operations = [calculateFitness, pauseOperation, selectionMethod, mutationMethod]
-naturalEnviroment = NaturalEnvironment(for: Jabberwocky.self, operations: operations)
-naturalEnviroment.start()
+naturalEnvironment = NaturalEnvironment(for: Jabberwocky.self, operations: operations)
+naturalEnvironment.start()
 ```
 
 ### What does "In-place and In-order" mean ?
-The Genetics Package is structed such that:
-Each Gene contains a list of traits as allele's.
-Each Genetic Object contains: 
-1) A Genome that is a list of Gene objects. 
-2) A chromosome that is a list of Trait objects.
+The Genetics Package is structed such that any value type can be used as a trait, even other structures with their own methods.
+The relationship between the value of the trait and the gene that holds it must be preserved in order to prevent traits from being mixed acrossed genes. 
+i.e. "Long Hair" where "Eye Color" should be, or "100 kg" where "64 cm" should be, etc. 
 ![in-place and in-order](/Images/Inorderandinplace.png)
 
 
 ### Note on Older Versions
 Older versions for Swift 5 and below no longer exist.
-Versions prior to 3.0 are no longer supported or available. This package bundle was created prior to the creation of Swift Packages and has undergone several changes since it's original inception and design in 2016.
+Versions prior to 3.0 are no longer supported or available. This package bundle was created prior to the creation of Swift Packages and has undergone several changes since its original inception and design in 2016.

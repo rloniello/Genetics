@@ -8,7 +8,7 @@
 import Foundation
 
 
-/// A Standard Genetic Object Enviroment in which Genetic Operations are executed.
+/// A Standard Genetic Object Environment in which Genetic Operations are executed.
 public class NaturalEnvironment {
     
     /// The population of this Eviroment
