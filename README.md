@@ -21,6 +21,9 @@ When used properly, even complex problems with permutations of approximately 10^
 - [x] Random Population Generation form a Genome.
 - [x] Support for AnyHashable Trait value, including other structs and complex types.
 
+### UML
+![UML of The Genetics Package](/Images/GP-UML.png)
+
 ### Getting Started
 For basic use, Implementation is quite straight-forward:
 0) Add Genetic to your project. 
